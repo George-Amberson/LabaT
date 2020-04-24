@@ -38,8 +38,8 @@ Matrix<A2>::Matrix(const Matrix& lhs)
 template <class A3>
 Matrix<A3>::~Matrix()
 {
-    for (int i = 0; i < width; i++) delete matrix[i];
-    delete matrix;
+    for (int i = 0; i < width; i++) delete [] matrix[i];
+    delete[] matrix;
 }
 
 template<class A1>
@@ -73,8 +73,8 @@ template <class A2>
        D.get_array()[i][j] = (*this).get_array()[i][j];
      }
    }
-   for (int i = 0; i < width; i++) delete matrix[i];
-   delete matrix;
+   for (int i = 0; i < width; i++) delete [] matrix[i];
+   delete []  matrix;
    width = _width;
    length = _length;
    matrix = new A1*[width];
@@ -95,7 +95,7 @@ template <class A2>
  template <class A3>
  A3*& Matrix<A3>::operator[](const int i)
  {
-   if ((i > width) || (i>length))throw length_error("uncorrect index");
+   if ((i > width) || (i>length)||(i<0))throw length_error("uncorrect index");
      return matrix[i]; 
  }
 
@@ -106,8 +106,8 @@ template <class A2>
      if (this == &lhs){
        return (*this);
      }
-     for (int i = 0; i < width; i++) delete matrix[i];
-     delete matrix;
+     for (int i = 0; i < width; i++) delete[] matrix[i];
+     delete[] matrix;
      width = lhs.get_width();
      length = lhs.get_length();
      matrix = new A1*[width];
@@ -121,3 +121,111 @@ template <class A2>
      }
      return *this;
  }
+
+ template <class Type>
+ Matrix<Type> operator +(Matrix<Type> &lhs, Matrix<Type>&rhs){
+
+   if ((lhs.get_width() != rhs.get_width()) || (lhs.get_length() != rhs.get_length()))throw length_error("matrix size not equal");
+   Matrix<Type> A(lhs.get_width(), rhs.get_length());
+   for (int i = 0; i < rhs.get_width(); i++)
+   {
+     for (int j = 0; j < rhs.get_length(); j++)
+     {
+       A[i][j] = lhs[i][j] + rhs[i][j];
+     }
+   }
+   return A;
+
+ }
+
+
+ template <class Type>
+ Matrix<Type> operator -(Matrix<Type>& lhs, Matrix<Type>& rhs){
+   
+     if ((lhs.get_width() != rhs.get_width()) || (lhs.get_length() != rhs.get_length()))throw length_error("matrix size not equal");
+     Matrix<Type> A(lhs);
+     for (int i = 0; i < rhs.get_width(); i++)
+     {
+       for (int j = 0; j < rhs.get_length(); j++)
+       {
+         A[i][j] = A[i][j] - rhs[i][j];
+       }
+     }
+     return A;
+
+ }
+
+ template <class E>
+ bool operator ==(Matrix<E>&lhs, Matrix<E>& rhs)
+ {
+   if ((lhs.get_width() != rhs.get_width()) || (lhs.get_length() != rhs.get_length()))
+   {
+     return false;
+   }
+   else{
+     for (int i = 0; i < lhs.get_width(); i++)
+     {
+       for (int j = 0; j < lhs.get_length(); j++)
+       {
+         if (lhs[i][j] != rhs[i][j]) return false;
+       }
+     }
+   }
+   return true;
+ }
+
+ template <class F>
+ Matrix<F> operator *(Matrix<F>& lhs, Matrix<F>& rhs){
+   
+     if (lhs.get_length() != rhs.get_width())throw length_error("matrix size uncorrect");
+     Matrix<F> C(lhs.get_width(), rhs.get_length());
+     F S;
+     for (int i = 0; i < lhs.get_width(); i++)
+     {
+       for (int j = 0; j < rhs.get_length(); j++)
+       {
+         S = 0;
+         for (int k = 0; k < rhs.get_width(); k++)
+         {
+           S = S + lhs.get_array()[i][k] * rhs.get_array()[k][j];
+         }
+         C[i][j] = S;
+       }
+     }
+     return C;
+   }
+
+ template <class R>
+  ostream& operator <<(ostream& out, Matrix<R>& rhs)
+ {
+   for (int i = 0; i < rhs.get_width(); i++)
+   {
+     for (int j = 0; j < rhs.get_length(); j++)
+     {
+       out << rhs.get_array()[i][j] << " ";
+     }
+     out << endl;
+   }
+   return out;
+ }
+
+  template <class K>
+   istream& operator >>(istream& in, Matrix<K>& rhs)
+  {
+    if ((rhs.get_length() == 0) || (rhs.get_width() == 0))
+    {
+      cout << "Vvedite width&Length" << endl;
+      int a, b;
+      in >> a >> b;
+      rhs.set_width_length(a, b);
+    }
+    for (int i = 0; i < rhs.get_width(); i++)
+    {
+      for (int j = 0; j < rhs.get_length(); j++)
+      {
+        in >> rhs[i][j];
+      }
+    }
+    return in;
+  }
+ 
